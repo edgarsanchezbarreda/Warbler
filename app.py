@@ -153,6 +153,12 @@ def users_show(user_id):
     return render_template('users/show.html', user=user, messages=messages)
 
 
+@app.route('/users/<int:user_id>/likes')
+def show_likes(user_id):
+    user = User.query.get_or_404(user_id)
+    return render_template('likes.html', user=user)
+
+
 @app.route('/users/<int:user_id>/following')
 def show_following(user_id):
     """Show list of people this user is following."""
@@ -268,6 +274,7 @@ def add_like(message_id):
     db.session.commit()
 
     return redirect("/")
+
 
 ##############################################################################
 # Messages routes:
