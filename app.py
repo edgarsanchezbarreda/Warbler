@@ -5,7 +5,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from sqlalchemy.exc import IntegrityError
 
 from forms import EditProfileForm, UserAddForm, LoginForm, MessageForm
-from models import db, connect_db, User, Message
+from models import db, connect_db, User, Message, Likes
 
 CURR_USER_KEY = "curr_user"
 
@@ -235,23 +235,6 @@ def profile():
             flash("Invalid password.", 'danger')
             return redirect('/')
     return render_template('edit.html', form=form)
-    # if form.validate_on_submit():
-        
-    #     user.email = form.email.data
-    #     user.username = form.username.data
-    #     user.image_url = form.image_url.data
-    #     user.header_image_url = form.header_image_url.data
-    #     user.bio = form.bio.data
-    #     user.location = form.location.data
-
-    #     db.session.commit()
-
-    #     return redirect(f"/users/{user_id}")
-    # else:
-    #     flash("Sorry, that was the wrong password!")
-    #     return redirect ('/')
-    # return render_template('edit.html', form=form)
-    # IMPLEMENT THIS
 
 
 @app.route('/users/delete', methods=["POST"])
@@ -270,6 +253,45 @@ def delete_user():
     return redirect("/signup")
 
 
+@app.route('/users/add_like/<int:message_id>', methods=['GET', 'POST'])
+def add_like(message_id): 
+    message = Message.query.get(message_id)
+    user = User.query.get(g.user.id)
+    
+    user_likes = user.likes
+
+    if message in user_likes:
+        g.user.likes = [like for like in user_likes if like != message]
+    else:
+        g.user.likes.append(message)
+
+    db.session.commit()
+
+    return redirect("/")
+
+    # if message.id not in user_likes:
+    #     liked_post = Likes(user_id=user.id, message_id=message.id)
+    #     db.session.add(liked_post)
+    #     db.session.commit()
+    #     return redirect('/')
+    # else:
+    #     liked_post = Likes.query.fiter_by(user_id=user.id, message_id=message.id)
+    #     db.session.delete(liked_post)
+    #     db.session.commit()
+    #     return redirect('/')
+
+
+# @app.route('/users/add_like/<int:message_id>', methods=['GET', 'POST'])
+# def remove_like(message_id): 
+#     message = Message.query.get(message_id)
+#     user = User.query.get(g.user.id)
+    
+#     user_likes = user.likes
+#     if message.id in user_likes:
+#         liked_post = Likes.query.fiter_by(user_id=user.id, message_id=message.id)
+#         db.session.delete(liked_post)
+#         db.session.commit()
+#         return redirect('/')
 ##############################################################################
 # Messages routes:
 
@@ -330,15 +352,21 @@ def homepage():
     - anon users: no messages
     - logged in: 100 most recent messages of followed_users
     """
-
+    
     if g.user:
+        """The following_ids are taken from the g.user object which is the current logged in user."""
+        following_ids = [f.id for f in g.user.following] + [g.user.id]
+
         messages = (Message
                     .query
+                    .filter(Message.user_id.in_(following_ids))
                     .order_by(Message.timestamp.desc())
                     .limit(100)
                     .all())
 
-        return render_template('home.html', messages=messages)
+        liked_msg_ids = [msg.id for msg in g.user.likes]
+
+        return render_template('home.html', messages=messages, likes=liked_msg_ids)
 
     else:
         return render_template('home-anon.html')
