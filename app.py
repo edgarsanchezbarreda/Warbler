@@ -215,10 +215,12 @@ def profile():
     user = User.query.get(user_id)
     form = EditProfileForm(obj=user)
     if form.validate_on_submit():
+        """Check if password input is valid."""
         user = User.authenticate(form.username.data,
                                  form.password.data)
 
         if user:
+            """If password was valid, update user profile and redirect to user detail page."""
             user.email = form.email.data
             user.username = form.username.data
             user.image_url = form.image_url.data
@@ -229,6 +231,7 @@ def profile():
             db.session.commit()
             return redirect(f"/users/{user_id}")
         else:
+            """If password was not valid, flash message and redirect to homepage."""
             flash("Invalid password.", 'danger')
             return redirect('/')
     return render_template('edit.html', form=form)
