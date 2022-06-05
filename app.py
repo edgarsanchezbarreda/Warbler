@@ -269,29 +269,6 @@ def add_like(message_id):
 
     return redirect("/")
 
-    # if message.id not in user_likes:
-    #     liked_post = Likes(user_id=user.id, message_id=message.id)
-    #     db.session.add(liked_post)
-    #     db.session.commit()
-    #     return redirect('/')
-    # else:
-    #     liked_post = Likes.query.fiter_by(user_id=user.id, message_id=message.id)
-    #     db.session.delete(liked_post)
-    #     db.session.commit()
-    #     return redirect('/')
-
-
-# @app.route('/users/add_like/<int:message_id>', methods=['GET', 'POST'])
-# def remove_like(message_id): 
-#     message = Message.query.get(message_id)
-#     user = User.query.get(g.user.id)
-    
-#     user_likes = user.likes
-#     if message.id in user_likes:
-#         liked_post = Likes.query.fiter_by(user_id=user.id, message_id=message.id)
-#         db.session.delete(liked_post)
-#         db.session.commit()
-#         return redirect('/')
 ##############################################################################
 # Messages routes:
 
