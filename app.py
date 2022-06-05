@@ -215,18 +215,39 @@ def profile():
     user = User.query.get(user_id)
     form = EditProfileForm(obj=user)
     if form.validate_on_submit():
-        
-        user.email = form.email.data
-        user.username = form.username.data
-        user.image_url = form.image_url.data
-        user.header_image_url = form.header_image_url.data
-        user.bio = form.bio.data
-        user.location = form.location.data
+        user = User.authenticate(form.username.data,
+                                 form.password.data)
 
-        db.session.commit()
+        if user:
+            user.email = form.email.data
+            user.username = form.username.data
+            user.image_url = form.image_url.data
+            user.header_image_url = form.header_image_url.data
+            user.bio = form.bio.data
+            user.location = form.location.data
 
-        return redirect(f"/users/{user_id}")
+            db.session.commit()
+            return redirect(f"/users/{user_id}")
+        else:
+            flash("Invalid password.", 'danger')
+            return redirect('/')
     return render_template('edit.html', form=form)
+    # if form.validate_on_submit():
+        
+    #     user.email = form.email.data
+    #     user.username = form.username.data
+    #     user.image_url = form.image_url.data
+    #     user.header_image_url = form.header_image_url.data
+    #     user.bio = form.bio.data
+    #     user.location = form.location.data
+
+    #     db.session.commit()
+
+    #     return redirect(f"/users/{user_id}")
+    # else:
+    #     flash("Sorry, that was the wrong password!")
+    #     return redirect ('/')
+    # return render_template('edit.html', form=form)
     # IMPLEMENT THIS
 
 
