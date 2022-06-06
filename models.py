@@ -109,7 +109,7 @@ class User(db.Model):
         primaryjoin=(Follows.user_following_id == id),
         secondaryjoin=(Follows.user_being_followed_id == id)
     )
-
+    
     likes = db.relationship(
         'Message',
         secondary="likes"
